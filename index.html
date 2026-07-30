@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Syed Nurul Hasan, Ph.D. — Computational Immunologist. Single-cell & spatial genomics, immuno-oncology, cardiovascular immunology.">
+<title>Syed Nurul Hasan, Ph.D. — Computational Immunologist</title>
+<style>
+  :root {
+    --ink: #0c1a1e;
+    --paper: #eef2ef;
+    --paper-raised: #ffffff;
+    --line: #c7d1cb;
+    --muted: #4c5c58;
+    --teal: #0e9a8a;
+    --teal-soft: #d8efe9;
+    --coral: #d94f3d;
+    --coral-soft: #f9e1db;
+    --focus: #0e9a8a;
+    --shadow: 0 1px 2px rgba(12,26,30,0.06), 0 8px 24px rgba(12,26,30,0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #e9f1ee;
+      --paper: #0a1414;
+      --paper-raised: #10201f;
+      --line: #24413d;
+      --muted: #9ab3ac;
+      --teal: #3fd8bf;
+      --teal-soft: #123531;
+      --coral: #ff8368;
+      --coral-soft: #3a1d17;
+      --focus: #3fd8bf;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 28px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #e9f1ee; --paper: #0a1414; --paper-raised: #10201f; --line: #24413d;
+    --muted: #9ab3ac; --teal: #3fd8bf; --teal-soft: #123531; --coral: #ff8368;
+    --coral-soft: #3a1d17; --focus: #3fd8bf;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 28px rgba(0,0,0,0.35);
+  }
+  :root[data-theme="light"] {
+    --ink: #0c1a1e; --paper: #eef2ef; --paper-raised: #ffffff; --line: #c7d1cb;
+    --muted: #4c5c58; --teal: #0e9a8a; --teal-soft: #d8efe9; --coral: #d94f3d;
+    --coral-soft: #f9e1db; --focus: #0e9a8a;
+    --shadow: 0 1px 2px rgba(12,26,30,0.06), 0 8px 24px rgba(12,26,30,0.06);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .display {
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  }
+  .mono {
+    font-family: ui-monospace, "SF Mono", "Menlo", "Cascadia Mono", Consolas, monospace;
+  }
+  code {
+    font-family: ui-monospace, monospace;
+    font-size: 0.9em;
+    background: var(--teal-soft);
+    color: var(--teal);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  a { color: var(--teal); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 28px; }
+  .overflow-x { overflow-x: auto; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    border-bottom: 1px solid var(--line);
+    padding: 56px 0 40px;
+    position: relative;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 32px;
+    align-items: center;
+  }
+  .sample-id {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+  .sample-id .dot { color: var(--coral); }
+  h1.name {
+    font-size: clamp(2rem, 5vw, 2.9rem);
+    line-height: 1.08;
+    margin: 0 0 6px;
+    text-wrap: balance;
+    font-weight: 500;
+  }
+  .role {
+    font-size: 1.08rem;
+    color: var(--teal);
+    margin: 0 0 18px;
+    font-weight: 600;
+  }
+  .summary {
+    max-width: 62ch;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+  .contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin-top: 20px;
+    font-size: 0.88rem;
+  }
+  .contact-row a { color: var(--ink); border-bottom: 1px dotted var(--line); }
+  .contact-row a:hover { color: var(--teal); border-color: var(--teal); text-decoration: none; }
+
+  canvas#umap {
+    display: block;
+    width: 220px;
+    height: 220px;
+    border-radius: 6px;
+  }
+  .umap-caption {
+    text-align: center;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---------- Section scaffolding ---------- */
+  section { padding: 44px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .section-num {
+    font-family: ui-monospace, monospace;
+    font-size: 0.78rem;
+    color: var(--coral);
+    background: var(--coral-soft);
+    border-radius: 4px;
+    padding: 2px 7px;
+  }
+  h2.section-title {
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0;
+    font-weight: 700;
+  }
+  .section-sub { color: var(--muted); font-size: 0.92rem; margin: -14px 0 24px; max-width: 60ch; }
+
+  /* ---------- Skills panels ---------- */
+  .panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .panel {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px 18px 16px;
+    box-shadow: var(--shadow);
+  }
+  .panel-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--teal);
+    font-weight: 700;
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-title .swatch {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--teal);
+    flex: none;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-size: 0.78rem;
+    padding: 3px 9px;
+    border-radius: 99px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    background: transparent;
+    white-space: nowrap;
+  }
+
+  /* ---------- Projects ---------- */
+  .projects { display: flex; flex-direction: column; gap: 16px; }
+  .project {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+  .project-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .project-name {
+    font-family: ui-monospace, monospace;
+    font-size: 1.02rem;
+    font-weight: 600;
+  }
+  .project-name a { color: var(--ink); }
+  .project-name a:hover { color: var(--teal); }
+  .project-tag {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--coral);
+    background: var(--coral-soft);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .project-desc { color: var(--muted); font-size: 0.94rem; margin: 8px 0 12px; max-width: 68ch; }
+  .project-meta {
+    display: flex; flex-wrap: wrap; gap: 8px 16px;
+    font-size: 0.8rem; color: var(--muted);
+  }
+  .project-meta strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .project-stack { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .project-stack .chip { font-family: ui-monospace, monospace; font-size: 0.72rem; }
+  .project-group-title {
+    font-family: ui-monospace, monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 28px 0 12px;
+  }
+  .project-group-title:first-child { margin-top: 0; }
+
+  /* ---------- Scale / impact ---------- */
+  .impact-callout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .impact-stat {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+  }
+  .impact-stat .num {
+    font-family: ui-monospace, monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--teal);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+  }
+  .impact-stat .label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+  .impact-table-wrap { overflow-x: auto; }
+  table.impact-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  table.impact-table th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 0 10px 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  table.impact-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  table.impact-table tr:last-child td { border-bottom: none; }
+  table.impact-table .cells-col {
+    font-family: ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--ink);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  table.impact-table .dataset-name { font-weight: 600; color: var(--ink); }
+  table.impact-table .dataset-cite { color: var(--muted); font-size: 0.82rem; }
+  .impact-own-row td { background: var(--teal-soft); }
+  .impact-footnote { color: var(--muted); font-size: 0.82rem; margin-top: 14px; max-width: 68ch; }
+
+  /* ---------- Figure strip ---------- */
+  .figure-strip-wrap { padding: 36px 0; border-bottom: 1px solid var(--line); }
+  .figure-strip-label {
+    font-family: ui-monospace, monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 0 4px;
+  }
+  .figure-strip-note { color: var(--muted); font-size: 0.82rem; margin: 0 0 18px; max-width: 62ch; }
+  .figure-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .figure-panel {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 14px 12px;
+    box-shadow: var(--shadow);
+  }
+  .figure-panel svg, .figure-panel canvas { display: block; width: 100%; height: auto; }
+  .figure-caption {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin: 8px 0 0;
+    letter-spacing: 0.02em;
+  }
+  .figure-caption b { color: var(--ink); font-weight: 600; }
+  .chord-label { font-size: 7.5px; fill: var(--ink); font-family: -apple-system, sans-serif; }
+  .dot-label { font-size: 7px; fill: var(--muted); font-family: ui-monospace, monospace; }
+  @media (max-width: 720px) {
+    .figure-strip { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Publications ---------- */
+  .pubs { list-style: none; margin: 0; padding: 0; counter-reset: pub; }
+  .pubs li {
+    counter-increment: pub;
+    padding: 12px 0 12px 34px;
+    border-top: 1px solid var(--line);
+    position: relative;
+    font-size: 0.92rem;
+  }
+  .pubs li:first-child { border-top: none; }
+  .pubs li::before {
+    content: counter(pub);
+    position: absolute;
+    left: 0; top: 12px;
+    font-family: ui-monospace, monospace;
+    font-size: 0.75rem;
+    color: var(--teal);
+    width: 22px;
+  }
+  .pubs .journal { color: var(--teal); font-style: italic; }
+  .pubs .year { color: var(--muted); font-family: ui-monospace, monospace; font-size: 0.82rem; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { display: flex; flex-direction: column; gap: 26px; }
+  .tl-item { display: grid; grid-template-columns: 92px 1fr; gap: 18px; }
+  .tl-years {
+    font-family: ui-monospace, monospace;
+    font-size: 0.82rem;
+    color: var(--muted);
+    padding-top: 2px;
+    white-space: nowrap;
+  }
+  .tl-body { border-left: 2px solid var(--line); padding-left: 18px; position: relative; }
+  .tl-body::before {
+    content: "";
+    position: absolute; left: -6px; top: 4px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--paper); border: 2px solid var(--teal);
+  }
+  .tl-role { font-weight: 700; font-size: 0.98rem; }
+  .tl-org { color: var(--muted); font-size: 0.88rem; margin-bottom: 6px; }
+  .tl-body ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.88rem; }
+  .tl-body li { margin-bottom: 4px; }
+
+  /* ---------- Honors ---------- */
+  .honors-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 14px; }
+  .honor { border-left: 2px solid var(--coral); padding-left: 14px; font-size: 0.9rem; color: var(--muted); }
+  .honor strong { color: var(--ink); display: block; font-size: 0.92rem; margin-bottom: 2px; }
+
+  footer {
+    padding: 30px 0 50px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--teal); }
+
+  @media (max-width: 640px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    canvas#umap { width: 160px; height: 160px; }
+    .tl-item { grid-template-columns: 1fr; }
+    .tl-years { padding-top: 0; }
+    .impact-callout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1 class="name display">Syed Nurul Hasan, Ph.D.</h1>
+      <p class="role">Computational Immunologist — Single-Cell Genomics &amp; Immuno-Oncology</p>
+      <p class="summary">Turning multi-omic data into therapeutic insight: 5+ years postdoctoral research across single-cell and spatial genomics, 10 peer-reviewed publications, and &gt;2,000,000 single cells analyzed across 20+ projects spanning cardiovascular immunology and immuno-oncology.</p>
+      <div class="contact-row mono">
+        <a href="mailto:nayanchoton1789@gmail.com">nayanchoton1789@gmail.com</a>
+        <a href="https://linkedin.com/in/syed-nurul-hasan-510b6112b" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://orcid.org/0000-0002-4564-872X" target="_blank" rel="noopener">ORCID 0000-0002-4564-872X</a>
+        <a href="https://github.com/syed1789" target="_blank" rel="noopener">github.com/syed1789</a>
+      </div>
+    </div>
+    <div>
+      <canvas id="umap" width="440" height="440"></canvas>
+      <p class="umap-caption mono">UMAP · 20+ single-cell projects</p>
+    </div>
+  </div>
+</div>
+
+<div class="figure-strip-wrap">
+  <div class="wrap">
+    <p class="figure-strip-label">Representative analysis outputs</p>
+    <p class="figure-strip-note">Illustrative renderings of standard single-cell/immunology output formats I work with daily — not tied to a specific dataset or study. Real, dataset-specific figures live in the linked repositories below.</p>
+    <div class="figure-strip">
+
+      <div class="figure-panel">
+        <canvas id="umap2" width="260" height="260"></canvas>
+        <p class="figure-caption"><b>A</b> · UMAP embedding, cluster-colored</p>
+      </div>
+
+      <div class="figure-panel">
+        <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" id="chordSvg">
+          <path d="M 59.1,202.5 Q 150,150 150.0,45.0" style="stroke:var(--coral); stroke-width:5.5; fill:none; opacity:0.67;" stroke-linecap="round"/>
+          <path d="M 59.1,202.5 Q 150,150 240.9,202.5" style="stroke:var(--coral); stroke-width:4.5; fill:none; opacity:0.59;" stroke-linecap="round"/>
+          <path d="M 59.1,202.5 Q 150,150 150.0,255.0" style="stroke:var(--coral); stroke-width:4.0; fill:none; opacity:0.56;" stroke-linecap="round"/>
+          <path d="M 240.9,97.5 Q 150,150 150.0,45.0" style="stroke:var(--teal); stroke-width:3.5; fill:none; opacity:0.52;" stroke-linecap="round"/>
+          <path d="M 240.9,97.5 Q 150,150 240.9,202.5" style="stroke:var(--teal); stroke-width:3.0; fill:none; opacity:0.49;" stroke-linecap="round"/>
+          <path d="M 59.1,97.5 Q 150,150 150.0,45.0" style="stroke:var(--muted); stroke-width:4.0; fill:none; opacity:0.56;" stroke-linecap="round"/>
+          <path d="M 150.0,255.0 Q 150,150 240.9,202.5" style="stroke:var(--muted); stroke-width:2.5; fill:none; opacity:0.45;" stroke-linecap="round"/>
+          <path d="M 59.1,202.5 Q 150,150 59.1,97.5" style="stroke:var(--coral); stroke-width:3.0; fill:none; opacity:0.49;" stroke-linecap="round"/>
+          <path d="M 59.1,202.5 Q 150,150 240.9,97.5" style="stroke:var(--coral); stroke-width:3.5; fill:none; opacity:0.52;" stroke-linecap="round"/>
+          <path d="M 150.0,45.0 Q 150,150 240.9,202.5" style="stroke:var(--teal); stroke-width:2.5; fill:none; opacity:0.45;" stroke-linecap="round"/>
+          <circle cx="150.0" cy="45.0" r="5.5" style="fill:var(--teal); stroke:var(--paper-raised); stroke-width:1.5;"/>
+          <circle cx="240.9" cy="97.5" r="5.5" style="fill:var(--teal); stroke:var(--paper-raised); stroke-width:1.5;"/>
+          <circle cx="240.9" cy="202.5" r="5.5" style="fill:var(--teal); stroke:var(--paper-raised); stroke-width:1.5;"/>
+          <circle cx="150.0" cy="255.0" r="5.5" style="fill:var(--muted); stroke:var(--paper-raised); stroke-width:1.5;"/>
+          <circle cx="59.1" cy="202.5" r="5.5" style="fill:var(--coral); stroke:var(--paper-raised); stroke-width:1.5;"/>
+          <circle cx="59.1" cy="97.5" r="5.5" style="fill:var(--muted); stroke:var(--paper-raised); stroke-width:1.5;"/>
+          <text x="150.0" y="22.0" class="chord-label" text-anchor="middle">CD4 T</text>
+          <text x="260.9" y="86.0" class="chord-label" text-anchor="start">Treg</text>
+          <text x="260.9" y="214.0" class="chord-label" text-anchor="start">CD8 T</text>
+          <text x="150.0" y="278.0" class="chord-label" text-anchor="middle">NK</text>
+          <text x="39.1" y="214.0" class="chord-label" text-anchor="end">Myeloid</text>
+          <text x="39.1" y="86.0" class="chord-label" text-anchor="end">B</text>
+        </svg>
+        <p class="figure-caption"><b>B</b> · Cell–cell interaction (chord)</p>
+      </div>
+
+      <div class="figure-panel">
+        <svg viewBox="0 0 300 260" xmlns="http://www.w3.org/2000/svg" id="dotplotSvg">
+          <text x="89.0" y="32" class="dot-label" text-anchor="middle" transform="rotate(-35 89.0 32)">CD4 T</text>
+          <text x="127.3" y="32" class="dot-label" text-anchor="middle" transform="rotate(-35 127.3 32)">CD8 T</text>
+          <text x="165.6" y="32" class="dot-label" text-anchor="middle" transform="rotate(-35 165.6 32)">Treg</text>
+          <text x="203.9" y="32" class="dot-label" text-anchor="middle" transform="rotate(-35 203.9 32)">B</text>
+          <text x="242.2" y="32" class="dot-label" text-anchor="middle" transform="rotate(-35 242.2 32)">Myeloid</text>
+          <text x="280.5" y="32" class="dot-label" text-anchor="middle" transform="rotate(-35 280.5 32)">NK</text>
+          <text x="58" y="56.5" class="dot-label" text-anchor="end" font-style="italic">CD3D</text>
+          <text x="58" y="84.8" class="dot-label" text-anchor="end" font-style="italic">CD8A</text>
+          <text x="58" y="113.1" class="dot-label" text-anchor="end" font-style="italic">FOXP3</text>
+          <text x="58" y="141.4" class="dot-label" text-anchor="end" font-style="italic">MS4A1</text>
+          <text x="58" y="169.7" class="dot-label" text-anchor="end" font-style="italic">CD14</text>
+          <text x="58" y="198.0" class="dot-label" text-anchor="end" font-style="italic">NKG7</text>
+          <circle cx="89.0" cy="54.0" r="6.7" style="fill:var(--teal); opacity:0.86;"/>
+          <circle cx="127.3" cy="54.0" r="6.52" style="fill:var(--teal); opacity:0.84;"/>
+          <circle cx="165.6" cy="54.0" r="6.28" style="fill:var(--teal); opacity:0.81;"/>
+          <circle cx="203.9" cy="54.0" r="1.3" style="fill:var(--teal); opacity:0.19;"/>
+          <circle cx="242.2" cy="54.0" r="1.18" style="fill:var(--teal); opacity:0.17;"/>
+          <circle cx="280.5" cy="54.0" r="1.6" style="fill:var(--teal); opacity:0.23;"/>
+          <circle cx="89.0" cy="82.3" r="1.3" style="fill:var(--teal); opacity:0.19;"/>
+          <circle cx="127.3" cy="82.3" r="6.4" style="fill:var(--teal); opacity:0.83;"/>
+          <circle cx="165.6" cy="82.3" r="1.48" style="fill:var(--teal); opacity:0.21;"/>
+          <circle cx="203.9" cy="82.3" r="1.12" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="242.2" cy="82.3" r="1.12" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="280.5" cy="82.3" r="3.7" style="fill:var(--teal); opacity:0.49;"/>
+          <circle cx="89.0" cy="110.6" r="1.48" style="fill:var(--teal); opacity:0.21;"/>
+          <circle cx="127.3" cy="110.6" r="1.18" style="fill:var(--teal); opacity:0.17;"/>
+          <circle cx="165.6" cy="110.6" r="6.1" style="fill:var(--teal); opacity:0.79;"/>
+          <circle cx="203.9" cy="110.6" r="1.06" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="242.2" cy="110.6" r="1.06" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="280.5" cy="110.6" r="1.12" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="89.0" cy="138.9" r="1.12" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="127.3" cy="138.9" r="1.06" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="165.6" cy="138.9" r="1.12" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="203.9" cy="138.9" r="6.7" style="fill:var(--teal); opacity:0.86;"/>
+          <circle cx="242.2" cy="138.9" r="1.18" style="fill:var(--teal); opacity:0.17;"/>
+          <circle cx="280.5" cy="138.9" r="1.12" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="89.0" cy="167.2" r="1.12" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="127.3" cy="167.2" r="1.06" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="165.6" cy="167.2" r="1.12" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="203.9" cy="167.2" r="1.18" style="fill:var(--teal); opacity:0.17;"/>
+          <circle cx="242.2" cy="167.2" r="6.52" style="fill:var(--teal); opacity:0.84;"/>
+          <circle cx="280.5" cy="167.2" r="1.3" style="fill:var(--teal); opacity:0.19;"/>
+          <circle cx="89.0" cy="195.5" r="1.6" style="fill:var(--teal); opacity:0.23;"/>
+          <circle cx="127.3" cy="195.5" r="4.3" style="fill:var(--teal); opacity:0.56;"/>
+          <circle cx="165.6" cy="195.5" r="1.3" style="fill:var(--teal); opacity:0.19;"/>
+          <circle cx="203.9" cy="195.5" r="1.12" style="fill:var(--teal); opacity:0.16;"/>
+          <circle cx="242.2" cy="195.5" r="1.48" style="fill:var(--teal); opacity:0.21;"/>
+          <circle cx="280.5" cy="195.5" r="6.4" style="fill:var(--teal); opacity:0.83;"/>
+        </svg>
+        <p class="figure-caption"><b>C</b> · Marker-gene expression (dot plot)</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section id="skills">
+    <div class="section-head">
+      <span class="section-num mono">01</span>
+      <h2 class="section-title">Assay Panel — Core Skills</h2>
+    </div>
+    <p class="section-sub">Technical competencies grouped as they'd appear on a gating strategy — by what they're used to resolve.</p>
+    <div class="panels">
+      <div class="panel">
+        <p class="panel-title"><span class="swatch"></span>Computational &amp; Data Science</p>
+        <div class="chips">
+          <span class="chip">R</span><span class="chip">Python</span><span class="chip">SQL</span>
+          <span class="chip">Machine Learning</span><span class="chip">Deep Learning (PyTorch/TensorFlow)</span>
+          <span class="chip">Statistical Analysis</span><span class="chip">Biostatistics</span>
+          <span class="chip">Bioinformatics</span><span class="chip">Data Visualization</span>
+          <span class="chip">Pipeline Development (Nextflow/Snakemake)</span><span class="chip">HPC / SLURM</span>
+          <span class="chip">Multi-Omics Integration</span>
+          <span class="chip">Public Cancer Genomics (TCGA/DepMap/CCLE/CPTAC)</span>
+        </div>
+      </div>
+      <div class="panel">
+        <p class="panel-title"><span class="swatch"></span>Single-Cell &amp; Spatial Genomics</p>
+        <div class="chips">
+          <span class="chip">scRNA-seq</span><span class="chip">snRNA-seq</span>
+          <span class="chip">Spatial Transcriptomics (VisiumHD)</span><span class="chip">Seurat</span>
+          <span class="chip">Scanpy</span><span class="chip">CellChat</span>
+          <span class="chip">Cell–Cell Communication</span><span class="chip">Trajectory Analysis</span>
+          <span class="chip">Immune Profiling</span><span class="chip">CITE-seq</span>
+        </div>
+      </div>
+      <div class="panel">
+        <p class="panel-title"><span class="swatch"></span>High-Throughput Sequencing</p>
+        <div class="chips">
+          <span class="chip">NGS</span><span class="chip">RNA-seq</span><span class="chip">ChIP-seq</span>
+          <span class="chip">ATAC-seq</span><span class="chip">CUT&amp;RUN</span><span class="chip">Bulk &amp; Single-Cell</span>
+          <span class="chip">Quality Control</span><span class="chip">Genomic Data Processing</span>
+        </div>
+      </div>
+      <div class="panel">
+        <p class="panel-title"><span class="swatch"></span>Functional Genomics &amp; Perturbation</p>
+        <div class="chips">
+          <span class="chip">CRISPR Screens (MAGeCK)</span><span class="chip">sgRNA / Gene-Level Hit-Calling</span>
+          <span class="chip">Perturb-seq</span><span class="chip">Functional Enrichment (clusterProfiler)</span>
+          <span class="chip">TCR/BCR-seq</span><span class="chip">Cytokine Profiling</span>
+        </div>
+      </div>
+      <div class="panel">
+        <p class="panel-title"><span class="swatch"></span>Experimental Techniques</p>
+        <div class="chips">
+          <span class="chip">Flow Cytometry</span><span class="chip">Spectral Flow (Cytek Aurora)</span>
+          <span class="chip">FACS</span><span class="chip">Immune Cell Isolation</span>
+          <span class="chip">Cell Culture</span><span class="chip">Molecular Biology</span>
+          <span class="chip">GEM Mouse Models</span><span class="chip">ECG</span>
+          <span class="chip">Immunophenotyping</span>
+        </div>
+      </div>
+      <div class="panel" style="grid-column: 1 / -1;">
+        <p class="panel-title"><span class="swatch"></span>Research Domains</p>
+        <div class="chips">
+          <span class="chip">Immuno-Oncology</span><span class="chip">Cardiovascular Immunology</span>
+          <span class="chip">Drug Discovery</span><span class="chip">Target Identification</span>
+          <span class="chip">Precision Medicine</span><span class="chip">Diabetic Heart Disease</span>
+          <span class="chip">Regulatory T Cell Biology</span><span class="chip">Immune-Metabolic Interactions</span>
+          <span class="chip">Translational Research</span><span class="chip">Autoimmunity</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="section-head">
+      <span class="section-num mono">02</span>
+      <h2 class="section-title">Featured Repositories</h2>
+    </div>
+    <p class="section-sub">10 public repositories implementing the pipelines above, on <a href="https://github.com/syed1789" target="_blank" rel="noopener">github.com/syed1789</a>.</p>
+
+    <p class="project-group-title">Flagship</p>
+    <div class="projects">
+      <div class="project">
+        <div class="project-head">
+          <span class="project-name mono"><a href="https://github.com/syed1789/bioinformatics-portfolio" target="_blank" rel="noopener">bioinformatics-portfolio</a></span>
+          <span class="project-tag">flagship</span>
+        </div>
+        <p class="project-desc">End-to-end single-cell &amp; spatial genomics toolkit — variant analysis, QC, scRNA-seq (Seurat + Scanpy), scATAC-seq (Signac + Episcanpy), spatial transcriptomics, and an immune checkpoint-blockade biomarker reanalysis of GSE120575 built from raw GEO files.</p>
+        <div class="project-meta mono">
+          <span>AUROC <strong>0.86</strong> (n=19), replicated across 3 parameterizations</span>
+          <span>9 documented analysis modules</span>
+        </div>
+        <div class="project-stack">
+          <span class="chip">Python</span><span class="chip">R</span><span class="chip">Seurat</span><span class="chip">Scanpy</span><span class="chip">Signac</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="project-group-title">Single-Cell &amp; Multi-Omics</p>
+    <div class="projects">
+      <div class="project">
+        <div class="project-head">
+          <span class="project-name mono"><a href="https://github.com/syed1789/scATAC-WNN-multimodal" target="_blank" rel="noopener">scATAC-WNN-multimodal</a></span>
+          <span class="project-tag">pipeline</span>
+        </div>
+        <p class="project-desc">10x Multiome scRNA + scATAC integration via Weighted Nearest Neighbor joint embedding — MACS2 peak calling, LSI, chromVAR TF motif deviation scoring, resolving transitional immune states invisible to either modality alone.</p>
+        <div class="project-meta mono">
+          <span>Seurat + Signac + ArchR</span>
+          <span>chromVAR TF-motif scoring</span>
+        </div>
+        <div class="project-stack">
+          <span class="chip">R</span><span class="chip">Seurat</span><span class="chip">Signac</span><span class="chip">ArchR</span><span class="chip">chromVAR</span>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-head">
+          <span class="project-name mono"><a href="https://github.com/syed1789/cite-seq-wnn-trajectory" target="_blank" rel="noopener">cite-seq-wnn-trajectory</a></span>
+          <span class="project-tag">pipeline</span>
+        </div>
+        <p class="project-desc">CITE-seq WNN integration (RNA + surface protein) on a public 10x PBMC dataset, followed by Monocle3 pseudotime on the integrated embedding — including a from-source Monocle3 build after five real dependency-resolution attempts.</p>
+        <div class="project-meta mono">
+          <span><strong>19</strong> clusters cleanly separated by CD3/CD19/CD14</span>
+          <span>WNN + Monocle3 pseudotime</span>
+        </div>
+        <div class="project-stack">
+          <span class="chip">R</span><span class="chip">Seurat</span><span class="chip">Monocle3</span><span class="chip">Docker</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="project-group-title">Functional Genomics &amp; Perturbation</p>
+    <div class="projects">
+      <div class="project">
+        <div class="project-head">
+          <span class="project-name mono"><a href="https://github.com/syed1789/crispr-mageck-screen" target="_blank" rel="noopener">crispr-mageck-screen</a></span>
+          <span class="project-tag">screen</span>
+        </div>
+        <p class="project-desc">MAGeCK RRA hit-calling (sgRNA + gene level) on the Wang et al. 2014 HL60/KBM7 CRISPR knockout screen, followed by GO/KEGG functional enrichment (clusterProfiler) on top hits.</p>
+        <div class="project-meta mono">
+          <span>Top hits ACLY/AHCY → TCA-cycle &amp; lipid-metabolism enrichment</span>
+        </div>
+        <div class="project-stack">
+          <span class="chip">MAGeCK</span><span class="chip">clusterProfiler</span><span class="chip">Docker</span>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-head">
+          <span class="project-name mono"><a href="https://github.com/syed1789/perturb-seq-deep-learning" target="_blank" rel="noopener">perturb-seq-deep-learning</a></span>
+          <span class="project-tag">deep learning</span>
+        </div>
+        <p class="project-desc">PyTorch MLP classifying CRISPRi guide identity from single-cell expression alone, on the Adamson et al. 2016 UPR Perturb-seq screen — class-weighted loss, baseline comparison, biologically legible per-class performance.</p>
+        <div class="project-meta mono">
+          <span>Test accuracy <strong>44.0%</strong> vs. <strong>30.8%</strong> majority-class baseline</span>
+        </div>
+        <div class="project-stack">
+          <span class="chip">PyTorch</span><span class="chip">Scanpy</span><span class="chip">scikit-learn</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="project-group-title">Bulk Sequencing Pipelines</p>
+    <div class="projects">
+      <div class="project">
+        <div class="project-head">
+          <span class="project-name mono"><a href="https://github.com/syed1789/nf-variant-pipeline" target="_blank" rel="noopener">nf-variant-pipeline</a></span>
+          <span class="project-tag">pipeline</span>
+        </div>
+        <p class="project-desc">Nextflow variant-calling pipeline covering both germline (BWA → GATK → bcftools) and somatic tumor-normal (Mutect2 → FilterMutectCalls → SnpEff) workflows, with Docker/Singularity profiles and a security review pass on the container and I/O handling.</p>
+        <div class="project-meta mono">
+          <span>Germline + somatic tumor-normal</span>
+          <span>Containerized, reproducible</span>
+        </div>
+        <div class="project-stack">
+          <span class="chip">Nextflow</span><span class="chip">GATK</span><span class="chip">Mutect2</span><span class="chip">SnpEff</span><span class="chip">Docker</span>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-head">
+          <span class="project-name mono"><a href="https://github.com/syed1789/bulk-rnaseq-star-deseq2" target="_blank" rel="noopener">bulk-rnaseq-star-deseq2</a></span>
+          <span class="project-tag">pipeline</span>
+        </div>
+        <p class="project-desc">STAR → featureCounts → DESeq2 as an actual Snakemake DAG, with a SLURM executor profile, SQLite results store, local-mode PySpark aggregation, and an Airflow DAG orchestrating the same pipeline — verified end-to-end via <code>airflow dags test</code>, not just written.</p>
+        <div class="project-meta mono">
+          <span>Snakemake + SLURM + SQL + Spark + Airflow, all executed</span>
+        </div>
+        <div class="project-stack">
+          <span class="chip">STAR</span><span class="chip">DESeq2</span><span class="chip">Snakemake</span><span class="chip">Airflow</span><span class="chip">PySpark</span>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-head">
+          <span class="project-name mono"><a href="https://github.com/syed1789/bulk-chipseq-pipeline" target="_blank" rel="noopener">bulk-chipseq-pipeline</a></span>
+          <span class="project-tag">pipeline</span>
+        </div>
+        <p class="project-desc">Classical antibody ChIP-seq with a matched Input control — bowtie2 end-to-end alignment, MACS3 peak calling, and biological-replicate concordance as the primary QC metric, on real Spt5 ChIP data.</p>
+        <div class="project-meta mono">
+          <span><strong>722 / 701</strong> peaks, <strong>67%</strong> replicate concordance</span>
+        </div>
+        <div class="project-stack">
+          <span class="chip">bowtie2</span><span class="chip">MACS3</span><span class="chip">Snakemake</span><span class="chip">SLURM</span>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-head">
+          <span class="project-name mono"><a href="https://github.com/syed1789/bulk-atacseq-pipeline" target="_blank" rel="noopener">bulk-atacseq-pipeline</a></span>
+          <span class="project-tag">pipeline</span>
+        </div>
+        <p class="project-desc">Bulk ATAC-seq with the full technique-specific QC stack: mitochondrial-read filtering, duplicate removal, Tn5 insertion-site shift (deeptools), fragment-size periodicity, and ENCODE-style TSS enrichment — not a relabeled ChIP-seq pipeline.</p>
+        <div class="project-meta mono">
+          <span>Nucleosome-free/mono-nuc periodicity + TSS enrichment, both real</span>
+        </div>
+        <div class="project-stack">
+          <span class="chip">bowtie2</span><span class="chip">deeptools</span><span class="chip">MACS3</span><span class="chip">Snakemake</span>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-head">
+          <span class="project-name mono"><a href="https://github.com/syed1789/cutandrun-pipeline" target="_blank" rel="noopener">cutandrun-pipeline</a></span>
+          <span class="project-tag">pipeline</span>
+        </div>
+        <p class="project-desc">bowtie2 + MACS3 peak calling on public CUT&amp;Tag data, with a TSS-proximity sanity check and an explicit, disclosed note on the CUT&amp;Tag-vs-CUT&amp;RUN distinction rather than blurring the two.</p>
+        <div class="project-meta mono">
+          <span><strong>90% / 66%</strong> of peak summits within 2kb of a TSS</span>
+        </div>
+        <div class="project-stack">
+          <span class="chip">bowtie2</span><span class="chip">MACS3</span><span class="chip">Snakemake</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="publications">
+    <div class="section-head">
+      <span class="section-num mono">03</span>
+      <h2 class="section-title">Selected Publications</h2>
+    </div>
+    <p class="section-sub">10 peer-reviewed papers; 8 listed below. Full list on <a href="https://orcid.org/0000-0002-4564-872X" target="_blank" rel="noopener">ORCID</a>.</p>
+    <div class="overflow-x">
+    <ol class="pubs">
+      <li>Yepuri G, Hasan SN, et al. Mechanistic underpinnings of AGEs-RAGE via DIAPH1 in ischemic, diabetic, and failing hearts. <span class="journal">American Journal of Physiology-Heart and Circulatory Physiology</span>, 328(4):H1026-H1037. <span class="year">2025</span></li>
+      <li>Menon RG, Yepuri G, Martel D, Quadri N, Hasan SN, et al. Assessment of cardiac and skeletal muscle metabolites using 1H-MRS and chemical-shift encoded MRI. <span class="journal">NMR in Biomedicine</span>, 38(1):e5275. <span class="year">2025</span></li>
+      <li>Hasan SN, Yepuri G, Quadri N, et al. Aldose Reductase Deletion Protects Ischemic Murine Hearts By Modulating Immune Cell Dynamics. <span class="journal">Circulation Research</span>, 133(Suppl_1):AP3086. <span class="year">2023</span></li>
+      <li>Yepuri G, Ramirez LM, Theophall GG, Reverdatto SV, Quadri N, Hasan SN, et al. DIAPH1-MFN2 interaction regulates mitochondria-SR/ER contact and modulates ischemic/hypoxic stress. <span class="journal">Nature Communications</span>, 14(1):6900. <span class="year">2023</span></li>
+      <li>Thiagarajan D, Quadri N, Jawahar S, Zirpoli H, Del Pozo CH, López-Díez R, Hasan SN, et al. Aldose reductase promotes diet-induced obesity via induction of senescence in subcutaneous adipose tissue. <span class="journal">Obesity</span>, 30(8):1647-1658. <span class="year">2022</span></li>
+      <li>Yepuri G, Hasan SN, Schmidt AM, Ramasamy R. Macrophage-adipocyte communication and cardiac remodeling. <span class="journal">The Journal of Experimental Medicine</span>, 218(9):e20211098. <span class="year">2021</span></li>
+      <li>Hasan SN, Sharma A, Ghosh S, Hong SW, Roy-Chowdhuri S, Im SH, et al. Bcl11b prevents catastrophic autoimmunity by controlling multiple aspects of a regulatory T cell gene expression program. <span class="journal">Science Advances</span>, 5(8):eaaw0706. <span class="year">2019</span></li>
+      <li>Kim CJ, Lee CG, Jung JY, Ghosh A, Hasan SN, et al. The transcription factor Ets1 suppresses T follicular helper type 2 cell differentiation to halt systemic lupus erythematosus. <span class="journal">Immunity</span>, 49(6):1034-1048.e8. <span class="year">2018</span></li>
+    </ol>
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="section-head">
+      <span class="section-num mono">04</span>
+      <h2 class="section-title">Experience</h2>
+    </div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-years mono">2020 — Present</div>
+        <div class="tl-body">
+          <div class="tl-role">Postdoctoral Scientist</div>
+          <div class="tl-org">NYU Grossman School of Medicine</div>
+          <ul>
+            <li>Led 12+ sequencing projects on diabetic heart disease, &gt;50TB analyzed, 3 novel therapeutic targets identified</li>
+            <li>scRNA-seq, nuclear RNA-seq &amp; spatial transcriptomics across 15+ cardiac disease models, &gt;100,000 cells</li>
+            <li>Discovered RAGE-DIAPH1 mechanism in heart failure (Nat. Commun. 2023, AJP-Heart 2025)</li>
+            <li>Built R/Python pipelines (Seurat, Scanpy, CellChat) cutting processing time 60%</li>
+            <li>Generated 8 GEM mouse models at 95% experimental accuracy; secured $500K+ in research funding</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-years mono">2019 — 2020</div>
+        <div class="tl-body">
+          <div class="tl-role">Postdoctoral Scientist</div>
+          <div class="tl-org">University of Florida College of Medicine</div>
+          <ul>
+            <li>Investigated Bcl11b in immunological tolerance via multi-parameter flow cytometry across 6+ disease models</li>
+            <li>Spectral Flow Cytometry (Cytek Aurora, 5-laser) — 200+ samples, 30-parameter immunophenotyping datasets</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-years mono">2014 — 2019</div>
+        <div class="tl-body">
+          <div class="tl-role">Ph.D. Researcher, Immunology</div>
+          <div class="tl-org">Institute for Basic Science / POSTECH, South Korea</div>
+          <ul>
+            <li>Bcl11b-deficient Tregs cause severe systemic autoimmunity — Science Advances (2019)</li>
+            <li>Contributed to Ets1/Tfh2 lupus mechanism paper — Immunity (2018)</li>
+            <li>ChIP-seq, RNA-seq &amp; ATAC-seq across 10+ experiments, &gt;5TB data, 50+ novel Treg target genes mapped</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="honors">
+    <div class="section-head">
+      <span class="section-num mono">05</span>
+      <h2 class="section-title">Honors &amp; Memberships</h2>
+    </div>
+    <div class="honors-grid">
+      <div class="honor"><strong>Excellent Publication Award (500,000 KRW)</strong>Institute for Basic Science, South Korea</div>
+      <div class="honor"><strong>NET Junior Research Fellowship — All-India Rank 36</strong>Top 0.1% nationally, Govt. of India</div>
+      <div class="honor"><strong>GATE — 98.44 Percentile</strong>Top 2% nationally</div>
+      <div class="honor"><strong>Member, The New York Academy of Sciences</strong>Since 2021</div>
+      <div class="honor"><strong>Member, American Heart Association</strong>Since 2020</div>
+      <div class="honor"><strong>Member, Korean Association of Immunologists</strong>Since 2015</div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; width:100%;">
+    <span>Syed Nurul Hasan, Ph.D. · Computational Immunologist</span>
+    <span><a href="mailto:nayanchoton1789@gmail.com">Get in touch</a></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function readVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function gaussian() {
+    var u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  }
+
+  // Seeded once so hero and figure-strip UMAPs share the same point cloud
+  // (deterministic layout, not re-rolled on every theme toggle).
+  var clusterDefs = [
+    { cx: 0.27, cy: 0.30, n: 85, r: 0.075, color: 'teal', alpha: 0.85 },   // CD4 T
+    { cx: 0.40, cy: 0.24, n: 60, r: 0.055, color: 'teal', alpha: 0.65 },   // Treg (adjacent island)
+    { cx: 0.66, cy: 0.22, n: 65, r: 0.07,  color: 'teal', alpha: 0.75 },   // CD8 T
+    { cx: 0.20, cy: 0.66, n: 70, r: 0.085, color: 'coral', alpha: 0.85 },  // Myeloid
+    { cx: 0.36, cy: 0.78, n: 35, r: 0.05,  color: 'coral', alpha: 0.6 },   // DC (adjacent island)
+    { cx: 0.70, cy: 0.68, n: 55, r: 0.075, color: 'muted', alpha: 0.8 },   // B
+    { cx: 0.82, cy: 0.42, n: 30, r: 0.05,  color: 'muted', alpha: 0.7 },   // NK
+    { cx: 0.50, cy: 0.48, n: 25, r: 0.045, color: 'muted', alpha: 0.5 }    // transitional
+  ];
+
+  var points = [];
+  clusterDefs.forEach(function (cl) {
+    for (var i = 0; i < cl.n; i++) {
+      points.push({
+        x: cl.cx + gaussian() * cl.r,
+        y: cl.cy + gaussian() * cl.r,
+        color: cl.color,
+        alpha: cl.alpha
+      });
+    }
+  });
+
+  function drawUMAP(canvasId, cssSize, dotR) {
+    var c = document.getElementById(canvasId);
+    if (!c) return null;
+    var ctx = c.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    c.width = cssSize * dpr;
+    c.height = cssSize * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    function draw() {
+      ctx.clearRect(0, 0, cssSize, cssSize);
+      var colors = { teal: readVar('--teal'), coral: readVar('--coral'), muted: readVar('--muted'), line: readVar('--line') };
+
+      // Axis: small L-shaped tick guide, bottom-left, matches how UMAP plots
+      // are conventionally shown (no numeric scale -- axes are arbitrary).
+      var m = cssSize * 0.06;
+      ctx.strokeStyle = colors.line;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(m, cssSize - m);
+      ctx.lineTo(m + cssSize * 0.18, cssSize - m);
+      ctx.moveTo(m, cssSize - m);
+      ctx.lineTo(m, cssSize - m - cssSize * 0.18);
+      ctx.stroke();
+      ctx.fillStyle = colors.line;
+      ctx.font = (cssSize * 0.026) + 'px ui-monospace, monospace';
+      ctx.fillText('UMAP 1', m, cssSize - m + cssSize * 0.045);
+      ctx.save();
+      ctx.translate(m - cssSize * 0.03, cssSize - m - cssSize * 0.06);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('UMAP 2', 0, 0);
+      ctx.restore();
+
+      points.forEach(function (p) {
+        ctx.beginPath();
+        ctx.arc(p.x * cssSize, p.y * cssSize, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = colors[p.color];
+        ctx.globalAlpha = p.alpha;
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+    return draw;
+  }
+
+  var redraws = [drawUMAP('umap', 440, 2.6), drawUMAP('umap2', 260, 1.9)].filter(Boolean);
+
+  function drawAll() { redraws.forEach(function (fn) { fn(); }); }
+
+  drawAll();
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  if (mq.addEventListener) mq.addEventListener('change', drawAll);
+  var mo = new MutationObserver(drawAll);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>
+</body>
+</html>
