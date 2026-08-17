@@ -426,6 +426,43 @@
     .tl-years { padding-top: 0; }
     .impact-callout { grid-template-columns: 1fr; }
   }
+
+  /* ---------- Signature closing sequence ---------- */
+  .sig-block {
+    padding: 12vh 6vw;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; position: relative; border-bottom: 1px solid var(--line);
+  }
+  .sig-block.swap { background: var(--ink); color: var(--paper); border-bottom-color: var(--ink); }
+  .sig-block.swap .sig-muted { color: color-mix(in srgb, var(--paper) 62%, transparent); }
+  .sig-block:not(.swap) .sig-muted { color: var(--muted); }
+
+  .sig-eyebrow { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 20px; }
+  .sig-statement { font-size: clamp(1.6rem, 4vw, 2.7rem); line-height: 1.24; font-weight: 400; max-width: 18ch; text-wrap: balance; }
+  .sig-statement .accent { color: var(--teal); font-style: italic; }
+  .sig-sub { max-width: 46ch; font-size: 1rem; line-height: 1.6; margin-top: 20px; }
+  .sig-rule { width: 46px; height: 2px; background: var(--teal); margin-top: 24px; border: none; }
+
+  .sig-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .sig-reveal.in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) { .sig-reveal { transition: none; opacity: 1; transform: none; } }
+
+  .sig-scrub-outer { height: 260vh; }
+  .sig-scrub-sticky {
+    position: sticky; top: 0; height: 100svh; width: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 8vh 6vw;
+  }
+  .sig-canvas-card {
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: var(--shadow); padding: 18px;
+  }
+  #sigScatter3d { touch-action: none; cursor: grab; display: block; border-radius: 4px; }
+  #sigScatter3d:active { cursor: grabbing; }
+  .sig-stage-label { font-size: 0.74rem; letter-spacing: 0.05em; margin-top: 18px; min-height: 1.4em; color: var(--coral); }
+  .sig-caption { max-width: 44ch; font-size: 0.78rem; line-height: 1.6; margin-top: 12px; }
+
+  @media (max-width: 640px) { .sig-scrub-outer { height: 220vh; } }
 </style>
 </head>
 <body>
@@ -866,6 +903,26 @@
 
 </div>
 
+<div class="sig-block swap">
+  <div class="sig-reveal">
+    <p class="sig-eyebrow mono sig-muted">SIGNATURE</p>
+    <p class="sig-statement display">From raw reads to <span class="accent">therapeutic insight.</span></p>
+    <hr class="sig-rule" />
+    <p class="sig-sub sig-muted">Eleven pipelines, ten publications, one question underneath all of it. The panel below doesn't just claim that — it shows the arc: signal, structure, and the population that stands out.</p>
+  </div>
+</div>
+
+<div class="sig-block sig-scrub-outer">
+  <div class="sig-scrub-sticky">
+    <p class="sig-eyebrow mono sig-muted" style="margin-bottom:14px;">SCROLL TO ADVANCE — DRAG TO ROTATE</p>
+    <div class="sig-canvas-card">
+      <canvas id="sigScatter3d" width="380" height="380"></canvas>
+    </div>
+    <p class="sig-stage-label mono" id="sigStageLabel">01 — RAW READS, UNRESOLVED</p>
+    <p class="sig-caption sig-muted">An illustrative embedding of 8 immune populations — scroll through raw signal, clustering, and one population isolated as a candidate of interest. Coordinates are illustrative, not tied to a specific dataset.</p>
+  </div>
+</div>
+
 <footer>
   <div class="wrap" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; width:100%;">
     <span>Syed Nurul Hasan, Ph.D. · Computational Immunologist</span>
@@ -965,6 +1022,178 @@
   if (mq.addEventListener) mq.addEventListener('change', drawAll);
   var mo = new MutationObserver(drawAll);
   mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>
+
+<script>
+(function () {
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // reveal-on-scroll for the signature statement
+  var reveals = document.querySelectorAll('.sig-reveal');
+  if ('IntersectionObserver' in window) {
+    var revealIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.35 });
+    reveals.forEach(function (el) { revealIO.observe(el); });
+  } else {
+    reveals.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  // scroll-scrubbed 3D embedding: raw signal -> clustered -> one population isolated
+  var canvas = document.getElementById('sigScatter3d');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var size = 380;
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  function readVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function smoothstep(a, b, x) { var t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(function (c) { return c + c; }).join('');
+    var n = parseInt(hex, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function lerpColor(hexA, hexB, t) {
+    var a = hexToRgb(hexA), b = hexToRgb(hexB);
+    return 'rgb(' + Math.round(lerp(a[0], b[0], t)) + ',' + Math.round(lerp(a[1], b[1], t)) + ',' + Math.round(lerp(a[2], b[2], t)) + ')';
+  }
+  function gaussian() {
+    var u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  }
+
+  // Same 8-population taxonomy as the UMAP panels above.
+  var clusterDefs = [
+    { id: 'cd4',   cx: -0.50, cy: -0.42, cz: 0.30,  n: 70, r: 0.16, color: 'teal',  alpha: 0.90 },
+    { id: 'treg',  cx: 0.10,  cy: -0.55, cz: -0.20, n: 45, r: 0.12, color: 'teal',  alpha: 0.75 },
+    { id: 'cd8',   cx: 0.55,  cy: -0.48, cz: 0.42,  n: 55, r: 0.15, color: 'teal',  alpha: 0.80 },
+    { id: 'mye',   cx: -0.55, cy: 0.50,  cz: -0.28, n: 60, r: 0.18, color: 'coral', alpha: 0.90 },
+    { id: 'dc',    cx: 0.02,  cy: 0.65,  cz: 0.15,  n: 30, r: 0.11, color: 'coral', alpha: 0.62 },
+    { id: 'b',     cx: 0.60,  cy: 0.45,  cz: -0.35, n: 48, r: 0.16, color: 'muted', alpha: 0.85 },
+    { id: 'nk',    cx: 0.75,  cy: -0.05, cz: 0.25,  n: 26, r: 0.11, color: 'muted', alpha: 0.70 },
+    { id: 'trans', cx: 0.00,  cy: 0.02,  cz: -0.02, n: 20, r: 0.10, color: 'muted', alpha: 0.50 }
+  ];
+
+  var points = [];
+  clusterDefs.forEach(function (cl) {
+    for (var i = 0; i < cl.n; i++) {
+      var clustered = { x: cl.cx + gaussian() * cl.r, y: cl.cy + gaussian() * cl.r, z: cl.cz + gaussian() * cl.r };
+      var raw = { x: gaussian() * 0.42, y: gaussian() * 0.42, z: gaussian() * 0.42 };
+      var expanded = cl.id === 'treg'
+        ? { x: cl.cx + (clustered.x - cl.cx) * 1.7, y: cl.cy + (clustered.y - cl.cy) * 1.7, z: cl.cz + (clustered.z - cl.cz) * 1.7 }
+        : clustered;
+      points.push({ clusterId: cl.id, color: cl.color, alpha: cl.alpha, raw: raw, clustered: clustered, expanded: expanded });
+    }
+  });
+
+  var rotY = 0.5, rotX = -0.26;
+  var autoRotate = true, dragging = false, lastX = 0, lastY = 0, idleTimer = null;
+  function setIdle() {
+    autoRotate = false; clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () { autoRotate = true; }, 2400);
+  }
+  canvas.addEventListener('pointerdown', function (e) {
+    dragging = true; lastX = e.clientX; lastY = e.clientY; setIdle();
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var dx = e.clientX - lastX, dy = e.clientY - lastY;
+    rotY += dx * 0.008;
+    rotX = Math.max(-1.2, Math.min(1.2, rotX + dy * 0.008));
+    lastX = e.clientX; lastY = e.clientY; setIdle();
+  });
+  window.addEventListener('pointerup', function () { dragging = false; });
+
+  function project(p) {
+    var cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+    var x1 = p.x * cosY - p.z * sinY, z1 = p.x * sinY + p.z * cosY;
+    var cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+    var y2 = p.y * cosX - z1 * sinX, z2 = p.y * sinX + z1 * cosX;
+    var focal = 2.6, scale = focal / (focal + z2);
+    return { sx: x1 * scale, sy: y2 * scale, scale: scale, z: z2 };
+  }
+
+  var scrubOuter = document.querySelector('.sig-scrub-outer');
+  var stageLabelEl = document.getElementById('sigStageLabel');
+  var scrubProgress = 0;
+  function updateScrub() {
+    var rect = scrubOuter.getBoundingClientRect();
+    var total = rect.height - window.innerHeight;
+    scrubProgress = total > 0 ? Math.max(0, Math.min(1, -rect.top / total)) : 0;
+  }
+  window.addEventListener('scroll', updateScrub, { passive: true });
+  window.addEventListener('resize', updateScrub);
+  updateScrub();
+
+  var lastStage = '';
+  function draw() {
+    var p = scrubProgress;
+    var mixRaw = smoothstep(0.0, 0.42, p);
+    var mixExpand = smoothstep(0.58, 1.0, p);
+    var focusTreg = smoothstep(0.55, 0.72, p);
+
+    var stage;
+    if (p < 0.4) stage = '01 — RAW READS, UNRESOLVED';
+    else if (p < 0.56) stage = '02 — CLUSTERED · 8 IMMUNE POPULATIONS';
+    else stage = '03 — CANDIDATE POPULATION ISOLATED';
+    if (stage !== lastStage) { stageLabelEl.textContent = stage; lastStage = stage; }
+
+    ctx.clearRect(0, 0, size, size);
+    var colors = { teal: readVar('--teal'), coral: readVar('--coral'), muted: readVar('--muted') };
+    var cx = size / 2, cy = size / 2, R = size * 0.34;
+
+    var projected = points.map(function (pt) {
+      var x = lerp(pt.raw.x, pt.clustered.x, mixRaw);
+      var y = lerp(pt.raw.y, pt.clustered.y, mixRaw);
+      var z = lerp(pt.raw.z, pt.clustered.z, mixRaw);
+      var isTreg = pt.clusterId === 'treg';
+      if (isTreg) {
+        x = lerp(x, pt.expanded.x, mixExpand);
+        y = lerp(y, pt.expanded.y, mixExpand);
+        z = lerp(z, pt.expanded.z, mixExpand);
+      }
+      var pr = project({ x: x, y: y, z: z });
+      var alpha = pt.alpha;
+      var fill = colors[pt.color];
+      if (isTreg) { fill = lerpColor(colors.teal, colors.coral, mixExpand); alpha = lerp(pt.alpha, 1, mixExpand); }
+      else if (focusTreg > 0) { alpha = pt.alpha * (1 - focusTreg * 0.6); }
+      return { sx: cx + pr.sx * R, sy: cy + pr.sy * R, scale: pr.scale, z: pr.z, fill: fill, alpha: alpha };
+    });
+    projected.sort(function (a, b) { return a.z - b.z; });
+
+    projected.forEach(function (pt) {
+      var r = Math.max(0.6, 2.5 * pt.scale);
+      ctx.beginPath();
+      ctx.arc(pt.sx, pt.sy, r, 0, Math.PI * 2);
+      ctx.fillStyle = pt.fill;
+      ctx.globalAlpha = Math.max(0, pt.alpha) * Math.min(1, pt.scale * 0.9 + 0.25);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  function tick() {
+    if (autoRotate && !reduceMotion) rotY += 0.0022;
+    draw();
+    requestAnimationFrame(tick);
+  }
+  if (reduceMotion) { draw(); } else { tick(); }
+
+  var mq2 = window.matchMedia('(prefers-color-scheme: dark)');
+  if (mq2.addEventListener) mq2.addEventListener('change', draw);
+  var mo2 = new MutationObserver(draw);
+  mo2.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 })();
 </script>
 
