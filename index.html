@@ -438,10 +438,11 @@
   .sig-block:not(.swap) .sig-muted { color: var(--muted); }
 
   .sig-eyebrow { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 20px; }
-  .sig-statement { font-size: clamp(1.6rem, 4vw, 2.7rem); line-height: 1.24; font-weight: 400; max-width: 18ch; text-wrap: balance; }
+  .sig-statement { font-size: clamp(1.92rem, 4.8vw, 3.24rem); line-height: 1.22; font-weight: 400; max-width: 18ch; text-wrap: balance; }
   .sig-statement .accent { color: var(--teal); font-style: italic; }
   .sig-sub { max-width: 46ch; font-size: 1rem; line-height: 1.6; margin-top: 20px; }
   .sig-rule { width: 46px; height: 2px; background: var(--teal); margin-top: 24px; border: none; }
+  .sig-kicker { font-size: 0.72rem; letter-spacing: 0.16em; margin-top: 18px; color: var(--coral); }
 
   .sig-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s ease; }
   .sig-reveal.in { opacity: 1; transform: translateY(0); }
@@ -454,8 +455,8 @@
     padding: 8vh 6vw;
   }
   .sig-canvas-card {
-    background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px;
-    box-shadow: var(--shadow); padding: 18px;
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: var(--shadow), 0 0 60px -12px color-mix(in srgb, var(--teal) 55%, transparent); padding: 18px;
   }
   #sigScatter3d { touch-action: none; cursor: grab; display: block; border-radius: 4px; }
   #sigScatter3d:active { cursor: grabbing; }
@@ -909,6 +910,7 @@
     <p class="sig-statement display">From raw reads to <span class="accent">therapeutic insight.</span></p>
     <hr class="sig-rule" />
     <p class="sig-sub sig-muted">Eleven pipelines, ten publications, one question underneath all of it. The panel below doesn't just claim that — it shows the arc: signal, structure, and the population that stands out.</p>
+    <p class="sig-kicker mono">SIGNAL  →  STRUCTURE  →  TARGET</p>
   </div>
 </div>
 
@@ -916,7 +918,7 @@
   <div class="sig-scrub-sticky">
     <p class="sig-eyebrow mono sig-muted" style="margin-bottom:14px;">SCROLL TO ADVANCE — DRAG TO ROTATE</p>
     <div class="sig-canvas-card">
-      <canvas id="sigScatter3d" width="380" height="380"></canvas>
+      <canvas id="sigScatter3d" width="440" height="440"></canvas>
     </div>
     <p class="sig-stage-label mono" id="sigStageLabel">01 — RAW READS, UNRESOLVED</p>
     <p class="sig-caption sig-muted">An illustrative embedding of 8 immune populations — scroll through raw signal, clustering, and one population isolated as a candidate of interest. Coordinates are illustrative, not tied to a specific dataset.</p>
@@ -1044,7 +1046,7 @@
   var canvas = document.getElementById('sigScatter3d');
   if (!canvas) return;
   var ctx = canvas.getContext('2d');
-  var size = 380;
+  var size = 440;
   var dpr = window.devicePixelRatio || 1;
   canvas.width = size * dpr;
   canvas.height = size * dpr;
@@ -1090,7 +1092,7 @@
       var clustered = { x: cl.cx + gaussian() * cl.r, y: cl.cy + gaussian() * cl.r, z: cl.cz + gaussian() * cl.r };
       var raw = { x: gaussian() * 0.42, y: gaussian() * 0.42, z: gaussian() * 0.42 };
       var expanded = cl.id === 'treg'
-        ? { x: cl.cx + (clustered.x - cl.cx) * 1.7, y: cl.cy + (clustered.y - cl.cy) * 1.7, z: cl.cz + (clustered.z - cl.cz) * 1.7 }
+        ? { x: cl.cx + (clustered.x - cl.cx) * 2.15, y: cl.cy + (clustered.y - cl.cy) * 2.15, z: cl.cz + (clustered.z - cl.cz) * 2.15 }
         : clustered;
       points.push({ clusterId: cl.id, color: cl.color, alpha: cl.alpha, raw: raw, clustered: clustered, expanded: expanded });
     }
@@ -1167,7 +1169,7 @@
       var alpha = pt.alpha;
       var fill = colors[pt.color];
       if (isTreg) { fill = lerpColor(colors.teal, colors.coral, mixExpand); alpha = lerp(pt.alpha, 1, mixExpand); }
-      else if (focusTreg > 0) { alpha = pt.alpha * (1 - focusTreg * 0.6); }
+      else if (focusTreg > 0) { alpha = pt.alpha * (1 - focusTreg * 0.78); }
       return { sx: cx + pr.sx * R, sy: cy + pr.sy * R, scale: pr.scale, z: pr.z, fill: fill, alpha: alpha };
     });
     projected.sort(function (a, b) { return a.z - b.z; });
@@ -1181,10 +1183,22 @@
       ctx.fill();
     });
     ctx.globalAlpha = 1;
+
+    if (focusTreg > 0.3) {
+      var tRing = (performance.now() % 1600) / 1600;
+      var prTreg = project({ x: 0.10, y: -0.55, z: -0.20 });
+      ctx.beginPath();
+      ctx.arc(cx + prTreg.sx * R, cy + prTreg.sy * R, 10 + tRing * 34, 0, Math.PI * 2);
+      ctx.strokeStyle = colors.coral;
+      ctx.globalAlpha = (1 - tRing) * 0.5 * focusTreg;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
   }
 
   function tick() {
-    if (autoRotate && !reduceMotion) rotY += 0.0022;
+    if (autoRotate && !reduceMotion) rotY += 0.0032;
     draw();
     requestAnimationFrame(tick);
   }
